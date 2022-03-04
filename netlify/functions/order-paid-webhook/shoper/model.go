@@ -1,6 +1,6 @@
-package model
+package shoper
 
-type ShoperOrder struct {
+type Order struct {
 	OrderId          string      `json:"order_id"`
 	UserId           string      `json:"user_id"`
 	Date             string      `json:"date"`

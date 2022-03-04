@@ -1,19 +1,18 @@
 package main
 
 import (
-	"crypto/sha1"
-	"encoding/hex"
-	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/model"
+	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/bioplanet"
+	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/checksum"
+	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/transformer"
 	"os"
-	"strconv"
-	"strings"
 )
 
-var secret = os.Getenv("API_KEY")
+var shoperApiKey = os.Getenv("SHOPER_API_KEY")
+var bioPlanetApiKey = os.Getenv("BIO_PLANET_API_KEY")
+var bioPlanetClientId = os.Getenv("BIO_PLANET_CLIENT_ID")
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	if isNotAuthenticated(request) {
@@ -22,70 +21,29 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}, nil
 	}
 
-	var shoperOrder model.ShoperOrder
-	err := json.Unmarshal([]byte(request.Body), &shoperOrder)
+	fmt.Println(request.Body)
+	_, err := transformer.ToBioPlanetOrder(request)
 	if err != nil {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: 500,
 		}, err
 	}
-	fmt.Println(shoperOrder)
 
-	//var bioPlanetOrder = model.BioPlanetOrder{
-	//	Address: model.Address{
-	//		Name:       buildName(shoperOrder),
-	//		Street:     shoperOrder.BillingAddress.Street1,
-	//		City:       shoperOrder.BillingAddress.City,
-	//		PostalCode: shoperOrder.BillingAddress.Postcode,
-	//		Phone:      shoperOrder.BillingAddress.Phone,
-	//		Email:      shoperOrder.Email,
-	//	},
-	//	PaymentId:    toInt(shoperOrder.PaymentId),
-	//	DeliveryName: shoperOrder.Shipping.Name,
-	//	Comment:      "Automatically created.",
-	//	OrderLines: struct {
-	//		KeyType string `json:"KeyType"`
-	//		Lines   []struct {
-	//			Key      string `json:"Key"`
-	//			Quantity int    `json:"Quantity"`
-	//		} `json:"Lines"`
-	//	}{},
-	//	InpostPaczkomatCode: "",
-	//}
+	body, err := bioplanet.GetApiToken(bioPlanetApiKey, bioPlanetClientId)
+	if err != nil {
+		return &events.APIGatewayProxyResponse{
+			StatusCode: 500,
+		}, err
+	}
+	fmt.Println(string(body))
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
 	}, nil
 }
 
-func toInt(stringInt string) int {
-	result, _ := strconv.Atoi(stringInt)
-	return result
-}
-
-func buildName(shoperOrder model.ShoperOrder) string {
-	sb := strings.Builder{}
-	sb.WriteString(shoperOrder.BillingAddress.Firstname)
-	sb.WriteString("")
-	sb.WriteString(shoperOrder.BillingAddress.Lastname)
-	return sb.String()
-}
-
 func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
-	return calculateChecksum(request) != request.Headers["x-webhook-sha1"]
-}
-
-func calculateChecksum(request events.APIGatewayProxyRequest) string {
-	sb := strings.Builder{}
-	sb.WriteString(request.Headers["x-webhook-id"])
-	sb.WriteString(":")
-	sb.WriteString(secret)
-	sb.WriteString(":")
-	sb.WriteString(request.Body)
-	hash := sha1.New()
-	hash.Write([]byte(sb.String()))
-	checksum := hex.EncodeToString(hash.Sum(nil)[:])
-	return checksum
+	return checksum.CalculateWebhookChecksum(request, shoperApiKey) != request.Headers["x-webhook-sha1"]
 }
 
 func main() {
