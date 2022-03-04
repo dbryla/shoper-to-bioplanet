@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -8,6 +9,7 @@ import (
 	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/checksum"
 	"github.com/dbryla/shoper-to-bioplanet/netlify/functions/order-paid-webhook/transformer"
 	"os"
+	"time"
 )
 
 var shoperApiKey = os.Getenv("SHOPER_API_KEY")
@@ -29,7 +31,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}, err
 	}
 
-	body, err := bioplanet.GetApiToken(bioPlanetApiKey, bioPlanetClientId)
+	body, err := getBioPlanetApiToken(err)
 	if err != nil {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: 500,
@@ -40,6 +42,24 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
 	}, nil
+}
+
+func getBioPlanetApiToken(err error) ([]byte, error) {
+	utcTimeNow := time.Now().UTC()
+	apiTokenPost, err := json.Marshal(bioplanet.ApiTokenPost{
+		Hash:      checksum.CalculateTokenPostChecksum(bioPlanetApiKey, utcTimeNow, bioPlanetClientId),
+		ClientId:  transformer.ToInt(bioPlanetClientId),
+		Timestamp: utcTimeNow,
+	})
+	if err != nil {
+		fmt.Println("Couldn't marshal bio planet api token.")
+		return nil, err
+	}
+	body, err := bioplanet.GetApiToken(apiTokenPost)
+	if err != nil {
+		return nil, err
+	}
+	return body, nil
 }
 
 func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
