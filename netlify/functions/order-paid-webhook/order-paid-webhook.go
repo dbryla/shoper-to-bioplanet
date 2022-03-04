@@ -12,7 +12,14 @@ import (
 var secret = os.Getenv("API_KEY")
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
+	fmt.Printf("Secret: %s\n", secret)
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		fmt.Println(pair[0])
+	}
 	checksum := calculateChecksum(request)
+	fmt.Printf("Actual: %s\n", checksum)
+	fmt.Printf("Expected: %s\n", request.Headers["x-webhook-sha1"])
 	if checksum != request.Headers["x-webhook-sha1"] {
 		fmt.Println("Rejected.")
 		return &events.APIGatewayProxyResponse{
