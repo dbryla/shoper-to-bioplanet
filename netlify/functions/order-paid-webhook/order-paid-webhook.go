@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -12,11 +13,6 @@ import (
 var secret = os.Getenv("API_KEY")
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
-	fmt.Printf("Secret: %s\n", secret)
-	for _, e := range os.Environ() {
-		pair := strings.SplitN(e, "=", 2)
-		fmt.Println(pair[0])
-	}
 	checksum := calculateChecksum(request)
 	fmt.Printf("Actual: %s\n", checksum)
 	fmt.Printf("Expected: %s\n", request.Headers["x-webhook-sha1"])
@@ -41,7 +37,7 @@ func calculateChecksum(request events.APIGatewayProxyRequest) string {
 	sb.WriteString(request.Body)
 	hash := sha1.New()
 	hash.Write([]byte(sb.String()))
-	checksum := string(hash.Sum(nil)[:])
+	checksum := hex.EncodeToString(hash.Sum(nil)[:])
 	return checksum
 }
 
