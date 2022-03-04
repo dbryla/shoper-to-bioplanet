@@ -1,7 +1,5 @@
 package bioplanet
 
-import "time"
-
 type Order struct {
 	Address             Address    `json:"Address"`
 	PaymentId           int        `json:"PaymentId"`
@@ -38,7 +36,7 @@ type Line struct {
 }
 
 type ApiTokenPost struct {
-	Hash      string    `json:"Hash"`
-	ClientId  int       `json:"ClientId"`
-	Timestamp time.Time `json:"Timestamp"`
+	Hash      string `json:"Hash"`
+	ClientId  int    `json:"ClientId"`
+	Timestamp string `json:"Timestamp"`
 }

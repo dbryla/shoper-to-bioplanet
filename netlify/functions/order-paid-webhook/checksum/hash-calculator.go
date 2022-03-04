@@ -7,10 +7,7 @@ import (
 	"github.com/aws/aws-lambda-go/events"
 	"hash"
 	"strings"
-	"time"
 )
-
-const TimestampFormat = "yyyy-MM-dd HH:mm:ss"
 
 func CalculateWebhookChecksum(request events.APIGatewayProxyRequest, shoperApiKey string) string {
 	sb := strings.Builder{}
@@ -22,10 +19,10 @@ func CalculateWebhookChecksum(request events.APIGatewayProxyRequest, shoperApiKe
 	return calculateChecksum(sb.String(), sha1.New())
 }
 
-func CalculateTokenPostChecksum(bioPlanetApiKey string, now time.Time, bioPlanetClientId string) string {
+func CalculateTokenPostChecksum(bioPlanetApiKey string, timestamp string, bioPlanetClientId string) string {
 	sb := strings.Builder{}
 	sb.WriteString(bioPlanetApiKey)
-	sb.WriteString(now.Format(TimestampFormat))
+	sb.WriteString(timestamp)
 	sb.WriteString(bioPlanetClientId)
 	return calculateChecksum(sb.String(), md5.New())
 }
