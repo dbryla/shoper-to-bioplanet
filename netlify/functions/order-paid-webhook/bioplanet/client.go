@@ -8,7 +8,7 @@ import (
 )
 
 func GetApiToken(apiTokenPost []byte) ([]byte, error) {
-	response, err := http.Post("/api3/token", "application/json", bytes.NewBuffer(apiTokenPost))
+	response, err := http.Post("https://drop.bioplanet.pl/api3/token", "application/json", bytes.NewBuffer(apiTokenPost))
 	if err != nil {
 		fmt.Println("Couldn't receive access token from bio planet.")
 		return nil, err
