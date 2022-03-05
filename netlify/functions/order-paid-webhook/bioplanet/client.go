@@ -40,6 +40,7 @@ func readTokenFromResponse(response *http.Response) (*ApiToken, error) {
 }
 
 func CreateOrder(token ApiToken, order Order) (*OrderConfirmation, error) {
+	fmt.Printf("token %+v order %+v\n", token, order)
 	requestBody, err := json.Marshal(order)
 	if err != nil {
 		fmt.Println("Couldn't marshal bio planet order request.")
