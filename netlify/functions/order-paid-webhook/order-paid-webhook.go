@@ -60,13 +60,11 @@ func createOrderInBioPlanet(request events.APIGatewayProxyRequest) (*bioplanet.O
 
 func getBioPlanetApiToken() (*bioplanet.ApiToken, error) {
 	utcTimeNow := time.Now().UTC().Format(TimestampFormat)
-	apiTokenPost := bioplanet.ApiTokenPost{
+	return bioplanet.GetApiToken(bioplanet.ApiTokenPost{
 		Hash:      checksum.CalculateTokenPostChecksum(bioPlanetApiKey, utcTimeNow, bioPlanetClientId),
 		ClientId:  transformer.ToInt(bioPlanetClientId),
 		Timestamp: utcTimeNow,
-	}
-	fmt.Println(apiTokenPost)
-	return bioplanet.GetApiToken(apiTokenPost)
+	})
 }
 
 func main() {
