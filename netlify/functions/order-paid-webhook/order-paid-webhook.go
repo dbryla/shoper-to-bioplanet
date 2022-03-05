@@ -15,6 +15,8 @@ var shoperApiKey = os.Getenv("SHOPER_API_KEY")
 var bioPlanetApiKey = os.Getenv("BIO_PLANET_API_KEY")
 var bioPlanetClientId = os.Getenv("BIO_PLANET_CLIENT_ID")
 
+const TimestampFormat = "2022-03-05 10:31:00"
+
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	if isNotAuthenticated(request) {
 		return &events.APIGatewayProxyResponse{
@@ -43,7 +45,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 }
 
 func getBioPlanetApiToken() ([]byte, error) {
-	utcTimeNow := time.Now().UTC().Format(time.RFC3339)
+	utcTimeNow := time.Now().UTC().Format(TimestampFormat)
 	apiTokenPost := bioplanet.ApiTokenPost{
 		Hash:      checksum.CalculateTokenPostChecksum(bioPlanetApiKey, utcTimeNow, bioPlanetClientId),
 		ClientId:  transformer.ToInt(bioPlanetClientId),
