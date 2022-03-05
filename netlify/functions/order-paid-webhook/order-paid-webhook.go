@@ -15,7 +15,7 @@ var shoperApiKey = os.Getenv("SHOPER_API_KEY")
 var bioPlanetApiKey = os.Getenv("BIO_PLANET_API_KEY")
 var bioPlanetClientId = os.Getenv("BIO_PLANET_CLIENT_ID")
 
-const TimestampFormat = "2022-03-05 10:31:00"
+const TimestampFormat = "2006-01-02 15:04:05"
 
 func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResponse, error) {
 	if isNotAuthenticated(request) {
