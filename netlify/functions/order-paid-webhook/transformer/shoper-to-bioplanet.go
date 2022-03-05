@@ -12,6 +12,8 @@ import (
 
 const ShoperCourierName = "Kurier"
 const BioPlanetCourierName = "Kurier InPost"
+const BioPlanetPaymentId = 85
+const BioPlanetOrderComment = "Automatically created."
 
 func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, error) {
 	var shoperOrder shoper.Order
@@ -30,9 +32,9 @@ func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, 
 			Phone:      shoperOrder.BillingAddress.Phone,
 			Email:      shoperOrder.Email,
 		},
-		PaymentId:    ToInt(shoperOrder.PaymentId),
+		PaymentId:    BioPlanetPaymentId,
 		DeliveryName: mapDeliveryName(shoperOrder),
-		Comment:      "Automatically created.",
+		Comment:      BioPlanetOrderComment,
 		OrderLines: bioplanet.OrderLines{
 			KeyType: "Id",
 		},
