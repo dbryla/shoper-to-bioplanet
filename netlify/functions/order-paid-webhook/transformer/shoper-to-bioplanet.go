@@ -13,6 +13,7 @@ import (
 const ShoperCourierName = "Kurier"
 const BioPlanetCourierName = "Kurier InPost"
 const BioPlanetPaymentId = 85
+const BioPlanetPolandCountryId = 1
 const BioPlanetOrderComment = "Automatically created."
 
 func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, error) {
@@ -25,12 +26,14 @@ func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, 
 
 	var bioPlanetOrder = bioplanet.Order{
 		Address: bioplanet.Address{
-			Name:       buildName(shoperOrder),
-			Street:     shoperOrder.BillingAddress.Street1,
-			City:       shoperOrder.BillingAddress.City,
-			PostalCode: shoperOrder.BillingAddress.Postcode,
-			Phone:      shoperOrder.BillingAddress.Phone,
-			Email:      shoperOrder.Email,
+			Name:          buildName(shoperOrder),
+			Street:        shoperOrder.BillingAddress.Street1,
+			City:          shoperOrder.BillingAddress.City,
+			PostalCode:    shoperOrder.BillingAddress.Postcode,
+			Phone:         shoperOrder.BillingAddress.Phone,
+			Email:         shoperOrder.Email,
+			CountryId:     BioPlanetPolandCountryId,
+			OneTimeAdress: true,
 		},
 		PaymentId:    BioPlanetPaymentId,
 		DeliveryName: mapDeliveryName(shoperOrder),
