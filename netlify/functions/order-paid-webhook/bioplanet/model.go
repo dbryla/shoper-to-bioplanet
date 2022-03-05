@@ -3,11 +3,11 @@ package bioplanet
 type Order struct {
 	Address             Address    `json:"Address"`
 	PaymentId           int        `json:"PaymentId"`
-	DeliveryId          int        `json:"DeliveryId"`
+	DeliveryId          int        `json:"DeliveryId,omitempty"`
 	DeliveryName        string     `json:"DeliveryName"`
 	Comment             string     `json:"Comment"`
 	OrderLines          OrderLines `json:"OrderLines"`
-	InpostPaczkomatCode string     `json:"InpostPaczkomatCode"`
+	InpostPaczkomatCode string     `json:"InpostPaczkomatCode,omitempty"`
 }
 
 type Address struct {
@@ -16,12 +16,12 @@ type Address struct {
 	City            string `json:"City"`
 	PostalCode      string `json:"PostalCode"`
 	Phone           string `json:"Phone"`
-	CountryId       int    `json:"CountryId"`
-	RegionId        int    `json:"RegionId"`
+	CountryId       int    `json:"CountryId,omitempty"`
+	RegionId        int    `json:"RegionId,omitempty"`
 	Email           string `json:"Email"`
-	ApartmentNumber string `json:"ApartmentNumber"`
-	HouseNumber     string `json:"HouseNumber"`
-	TaxNumber       string `json:"TaxNumber"`
+	ApartmentNumber string `json:"ApartmentNumber,omitempty"`
+	HouseNumber     string `json:"HouseNumber,omitempty"`
+	TaxNumber       string `json:"TaxNumber,omitempty"`
 	OneTimeAdress   bool   `json:"OneTimeAdress"`
 }
 

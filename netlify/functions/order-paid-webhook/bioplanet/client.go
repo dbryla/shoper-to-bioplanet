@@ -74,6 +74,9 @@ func readOrderFromResponse(response *http.Response) (*OrderConfirmation, error) 
 		fmt.Println("Couldn't read order response from bio planet.")
 		return nil, err
 	}
+	if response.StatusCode != 200 {
+		return nil, fmt.Errorf("Non OK response:  %s", string(body))
+	}
 	var orderConfirmation OrderConfirmation
 	err = json.Unmarshal(body, &orderConfirmation)
 	if err != nil {

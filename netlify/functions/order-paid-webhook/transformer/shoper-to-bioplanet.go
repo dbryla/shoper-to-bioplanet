@@ -10,6 +10,9 @@ import (
 	"strings"
 )
 
+const ShoperCourierName = "Kurier"
+const BioPlanetCourierName = "Kurier InPost"
+
 func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, error) {
 	var shoperOrder shoper.Order
 	err := json.Unmarshal([]byte(request.Body), &shoperOrder)
@@ -28,7 +31,7 @@ func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, 
 			Email:      shoperOrder.Email,
 		},
 		PaymentId:    ToInt(shoperOrder.PaymentId),
-		DeliveryName: shoperOrder.Shipping.Name,
+		DeliveryName: mapDeliveryName(shoperOrder),
 		Comment:      "Automatically created.",
 		OrderLines: bioplanet.OrderLines{
 			KeyType: "Id",
@@ -42,10 +45,17 @@ func ToBioPlanetOrder(request events.APIGatewayProxyRequest) (*bioplanet.Order, 
 	return &bioPlanetOrder, nil
 }
 
+func mapDeliveryName(shoperOrder shoper.Order) string {
+	if ShoperCourierName == shoperOrder.Shipping.Name {
+		return BioPlanetCourierName
+	}
+	return BioPlanetCourierName
+}
+
 func buildName(shoperOrder shoper.Order) string {
 	sb := strings.Builder{}
 	sb.WriteString(shoperOrder.BillingAddress.Firstname)
-	sb.WriteString("")
+	sb.WriteString(" ")
 	sb.WriteString(shoperOrder.BillingAddress.Lastname)
 	return sb.String()
 }
