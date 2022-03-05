@@ -24,27 +24,41 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 		}, nil
 	}
 
-	_, err := transformer.ToBioPlanetOrder(request)
+	_, err := createOrderInBioPlanet(request)
 	if err != nil {
 		return &events.APIGatewayProxyResponse{
 			StatusCode: 500,
 		}, err
 	}
-
-	body, err := getBioPlanetApiToken()
-	if err != nil {
-		return &events.APIGatewayProxyResponse{
-			StatusCode: 500,
-		}, err
-	}
-	fmt.Print(string(body))
 
 	return &events.APIGatewayProxyResponse{
 		StatusCode: 200,
 	}, nil
 }
 
-func getBioPlanetApiToken() ([]byte, error) {
+func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
+	return checksum.CalculateWebhookChecksum(request, shoperApiKey) != request.Headers["x-webhook-sha1"]
+}
+
+func createOrderInBioPlanet(request events.APIGatewayProxyRequest) (*bioplanet.OrderConfirmation, error) {
+	order, err := transformer.ToBioPlanetOrder(request)
+	if err != nil {
+		return nil, err
+	}
+	token, err := getBioPlanetApiToken()
+	if err != nil {
+		return nil, err
+	}
+	orderConfirmation, err := bioplanet.CreateOrder(*token, *order)
+	if err != nil {
+		fmt.Printf("Failed order creation: %+v\n", order)
+		return nil, err
+	}
+	fmt.Printf("Order created no. %d\n", orderConfirmation.OrderId)
+	return orderConfirmation, nil
+}
+
+func getBioPlanetApiToken() (*bioplanet.ApiToken, error) {
 	utcTimeNow := time.Now().UTC().Format(TimestampFormat)
 	apiTokenPost := bioplanet.ApiTokenPost{
 		Hash:      checksum.CalculateTokenPostChecksum(bioPlanetApiKey, utcTimeNow, bioPlanetClientId),
@@ -53,10 +67,6 @@ func getBioPlanetApiToken() ([]byte, error) {
 	}
 	fmt.Println(apiTokenPost)
 	return bioplanet.GetApiToken(apiTokenPost)
-}
-
-func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
-	return checksum.CalculateWebhookChecksum(request, shoperApiKey) != request.Headers["x-webhook-sha1"]
 }
 
 func main() {

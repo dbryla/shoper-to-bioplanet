@@ -40,3 +40,13 @@ type ApiTokenPost struct {
 	ClientId  int    `json:"ClientId"`
 	Timestamp string `json:"Timestamp"`
 }
+
+type ApiToken struct {
+	AccessToken string `json:"AccessToken"`
+	TokenType   string `json:"TokenType"`
+	ExpiresIn   int    `json:"ExpiresIn"`
+}
+
+type OrderConfirmation struct {
+	OrderId int `json:"OrderId"`
+}
