@@ -21,7 +21,7 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 }
 
 func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
-	return request.QueryStringParameters["api-key"] == apiKey
+	return request.QueryStringParameters["api-key"] != apiKey
 }
 
 func main() {
