@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 	"os"
 )
 
@@ -21,4 +22,8 @@ func handler(request events.APIGatewayProxyRequest) (*events.APIGatewayProxyResp
 
 func isNotAuthenticated(request events.APIGatewayProxyRequest) bool {
 	return request.QueryStringParameters["api-key"] == apiKey
+}
+
+func main() {
+	lambda.Start(handler)
 }
